@@ -257,6 +257,11 @@ public class CropImageView extends TransformImageView {
         postRotate(deltaAngle, mCropRect.centerX(), mCropRect.centerY());
     }
 
+    public void postFlip() {
+        mCurrentImageMatrix.postScale(-1, 1, mCropRect.centerX(), mCropRect.centerY());
+        setImageMatrix(mCurrentImageMatrix);
+    }
+
     /**
      * This method cancels all current Runnable objects that represent animations.
      */
