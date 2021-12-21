@@ -519,6 +519,12 @@ public class UCropActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.wrapper_flip).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGestureCropImageView.postFlip();
+            }
+        });
         setAngleTextColor(mActiveControlsWidgetColor);
     }
 

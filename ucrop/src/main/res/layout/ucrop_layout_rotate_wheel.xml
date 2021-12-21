@@ -38,6 +38,21 @@
     <FrameLayout
         android:id="@+id/wrapper_rotate_by_angle"
         style="@style/ucrop_WrapperRotateButton"
+        android:layout_toStartOf="@+id/wrapper_flip"
+        android:layout_toLeftOf="@+id/wrapper_flip"
+        android:layout_centerVertical="true"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            style="@style/ucrop_ImageViewWidgetIcon"
+            android:src="@drawable/ucrop_ic_angle"
+            android:tint="@color/ucrop_color_widget_rotate_angle" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/wrapper_flip"
+        style="@style/ucrop_WrapperRotateButton"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
@@ -45,7 +60,7 @@
 
         <ImageView
             style="@style/ucrop_ImageViewWidgetIcon"
-            android:src="@drawable/ucrop_ic_angle"
+            android:src="@drawable/ic_flip"
             android:tint="@color/ucrop_color_widget_rotate_angle" />
 
     </FrameLayout>

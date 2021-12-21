@@ -401,7 +401,12 @@ public class UCropFragment extends Fragment {
                 rotateByAngle(90);
             }
         });
-
+        view.findViewById(R.id.wrapper_flip).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGestureCropImageView.postFlip();
+            }
+        });
         setAngleTextColor(mActiveControlsWidgetColor);
     }
 
