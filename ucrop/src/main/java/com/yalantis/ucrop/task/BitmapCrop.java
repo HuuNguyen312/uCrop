@@ -58,7 +58,7 @@ public class BitmapCrop {
     }
 
     @Nullable
-    protected Bitmap saveBitmap() {
+    public Bitmap saveBitmap() {
         if (mViewBitmap == null) {
             return null;
         } else if (mViewBitmap.isRecycled()) {

@@ -14,6 +14,7 @@ import com.yalantis.ucrop.callback.BitmapCropCallback;
 import com.yalantis.ucrop.callback.CropBoundsChangeListener;
 import com.yalantis.ucrop.model.CropParameters;
 import com.yalantis.ucrop.model.ImageState;
+import com.yalantis.ucrop.task.BitmapCrop;
 import com.yalantis.ucrop.task.BitmapCropTask;
 import com.yalantis.ucrop.util.CubicEasing;
 import com.yalantis.ucrop.util.RectUtils;
@@ -89,6 +90,25 @@ public class CropImageView extends TransformImageView {
 
         new BitmapCropTask(getContext(), getViewBitmap(), imageState, cropParameters, cropCallback)
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public Bitmap cropAndSaveBitmap(@NonNull Bitmap.CompressFormat compressFormat, int compressQuality) {
+        cancelAllAnimations();
+        setImageToWrapCropBounds(false);
+
+        final ImageState imageState = new ImageState(
+                mCropRect, RectUtils.trapToRect(mCurrentImageCorners),
+                getCurrentScale(), getCurrentAngle());
+
+        final CropParameters cropParameters = new CropParameters(
+                mMaxResultImageSizeX, mMaxResultImageSizeY,
+                compressFormat, compressQuality,
+                getImageInputPath(), getImageOutputPath(), getExifInfo());
+
+        cropParameters.setContentImageInputUri(getImageInputUri());
+        cropParameters.setContentImageOutputUri(getImageOutputUri());
+
+        return new BitmapCrop(getContext(), getViewBitmap(), imageState, cropParameters).saveBitmap();
     }
 
     /**
