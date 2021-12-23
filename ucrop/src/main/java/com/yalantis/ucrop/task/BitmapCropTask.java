@@ -59,18 +59,19 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
 
     private int mCroppedImageWidth, mCroppedImageHeight;
     private int cropOffsetX, cropOffsetY;
+    private boolean flipHorizontally;
 
     public BitmapCropTask(@NonNull Context context, @Nullable Bitmap viewBitmap, @NonNull ImageState imageState, @NonNull CropParameters cropParameters,
                           @Nullable BitmapCropCallback cropCallback) {
 
         mContext = new WeakReference<>(context);
-
         mViewBitmap = viewBitmap;
         mCropRect = imageState.getCropRect();
         mCurrentImageRect = imageState.getCurrentImageRect();
+        flipHorizontally = imageState.isFlipHorizontally();
 
         mCurrentScale = imageState.getCurrentScale();
-        mCurrentAngle = imageState.getCurrentAngle();
+        mCurrentAngle = (flipHorizontally) ? 180 + imageState.getCurrentAngle() : imageState.getCurrentAngle();
         mMaxResultImageSizeX = cropParameters.getMaxResultImageSizeX();
         mMaxResultImageSizeY = cropParameters.getMaxResultImageSizeY();
 
@@ -139,10 +140,41 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
                 mCurrentScale /= resizeScale;
             }
         }
+        if (flipHorizontally || mCurrentAngle != 0) {
+            Matrix tempMatrix = new Matrix();
+            if (mCurrentAngle != 0) {
+                tempMatrix.setRotate(mCurrentAngle);
+            }
+
+            if (flipHorizontally) {
+                tempMatrix.postScale(-1, 1);
+            }
+
+            Bitmap flipBitmap = Bitmap.createBitmap(mViewBitmap, 0, 0, mViewBitmap.getWidth(), mViewBitmap.getHeight(),
+                    tempMatrix, true);
+            if (mViewBitmap != flipBitmap) {
+                mViewBitmap.recycle();
+            }
+            mViewBitmap = flipBitmap;
+        }
+
+
+        /*if (flipHorizontally) {
+            Matrix tempMatrix = new Matrix();
+            tempMatrix.postScale(-1, 1, mViewBitmap.getWidth() / 2, mViewBitmap.getHeight() / 2);
+
+            Bitmap flipBitmap = Bitmap.createBitmap(mViewBitmap, 0, 0, mViewBitmap.getWidth(), mViewBitmap.getHeight(),
+                    tempMatrix, true);
+            if (mViewBitmap != flipBitmap) {
+                mViewBitmap.recycle();
+            }
+            mViewBitmap = flipBitmap;
+        }
 
         // Rotate if needed
         if (mCurrentAngle != 0) {
             Matrix tempMatrix = new Matrix();
+
             tempMatrix.setRotate(mCurrentAngle, mViewBitmap.getWidth() / 2, mViewBitmap.getHeight() / 2);
 
             Bitmap rotatedBitmap = Bitmap.createBitmap(mViewBitmap, 0, 0, mViewBitmap.getWidth(), mViewBitmap.getHeight(),
@@ -151,7 +183,7 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
                 mViewBitmap.recycle();
             }
             mViewBitmap = rotatedBitmap;
-        }
+        }*/
 
         cropOffsetX = Math.round((mCropRect.left - mCurrentImageRect.left) / mCurrentScale);
         cropOffsetY = Math.round((mCropRect.top - mCurrentImageRect.top) / mCurrentScale);

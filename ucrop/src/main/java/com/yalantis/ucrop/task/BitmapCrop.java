@@ -42,6 +42,7 @@ public class BitmapCrop {
 
     private int mCroppedImageWidth, mCroppedImageHeight;
     private int cropOffsetX, cropOffsetY;
+    private boolean flipHorizontally;
 
     public BitmapCrop(@NonNull Context context, @Nullable Bitmap viewBitmap, @NonNull ImageState imageState, @NonNull CropParameters cropParameters) {
 
@@ -50,9 +51,10 @@ public class BitmapCrop {
         mViewBitmap = viewBitmap;
         mCropRect = imageState.getCropRect();
         mCurrentImageRect = imageState.getCurrentImageRect();
+        flipHorizontally = imageState.isFlipHorizontally();
 
         mCurrentScale = imageState.getCurrentScale();
-        mCurrentAngle = imageState.getCurrentAngle();
+        mCurrentAngle = (flipHorizontally) ? 180 + imageState.getCurrentAngle() : imageState.getCurrentAngle();
         mMaxResultImageSizeX = cropParameters.getMaxResultImageSizeX();
         mMaxResultImageSizeY = cropParameters.getMaxResultImageSizeY();
     }
@@ -105,17 +107,22 @@ public class BitmapCrop {
             }
         }
 
-        // Rotate if needed
-        if (mCurrentAngle != 0) {
+        if (flipHorizontally || mCurrentAngle != 0) {
             Matrix tempMatrix = new Matrix();
-            tempMatrix.setRotate(mCurrentAngle, mViewBitmap.getWidth() / 2, mViewBitmap.getHeight() / 2);
+            if (mCurrentAngle != 0) {
+                tempMatrix.setRotate(mCurrentAngle);
+            }
 
-            Bitmap rotatedBitmap = Bitmap.createBitmap(mViewBitmap, 0, 0, mViewBitmap.getWidth(), mViewBitmap.getHeight(),
+            if (flipHorizontally) {
+                tempMatrix.postScale(-1, 1);
+            }
+
+            Bitmap flipBitmap = Bitmap.createBitmap(mViewBitmap, 0, 0, mViewBitmap.getWidth(), mViewBitmap.getHeight(),
                     tempMatrix, true);
-            if (mViewBitmap != rotatedBitmap) {
+            if (mViewBitmap != flipBitmap) {
                 mViewBitmap.recycle();
             }
-            mViewBitmap = rotatedBitmap;
+            mViewBitmap = flipBitmap;
         }
 
         cropOffsetX = Math.round((mCropRect.left - mCurrentImageRect.left) / mCurrentScale);

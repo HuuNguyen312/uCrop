@@ -55,7 +55,7 @@ public class TransformImageView extends AppCompatImageView {
     private String mImageInputPath, mImageOutputPath;
     private Uri mImageInputUri, mImageOutputUri;
     private ExifInfo mExifInfo;
-
+    protected boolean mFlipHorizontally;
     /**
      * Interface for rotation and scale change notifying.
      */
@@ -202,6 +202,10 @@ public class TransformImageView extends AppCompatImageView {
     public float getMatrixAngle(@NonNull Matrix matrix) {
         return (float) -(Math.atan2(getMatrixValue(matrix, Matrix.MSKEW_X),
                 getMatrixValue(matrix, Matrix.MSCALE_X)) * (180 / Math.PI));
+    }
+
+    public boolean isFlipHorizontally() {
+        return mFlipHorizontally;
     }
 
     @Override

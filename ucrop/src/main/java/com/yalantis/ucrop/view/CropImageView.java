@@ -78,7 +78,7 @@ public class CropImageView extends TransformImageView {
 
         final ImageState imageState = new ImageState(
                 mCropRect, RectUtils.trapToRect(mCurrentImageCorners),
-                getCurrentScale(), getCurrentAngle());
+                getCurrentScale(), getCurrentAngle(), isFlipHorizontally());
 
         final CropParameters cropParameters = new CropParameters(
                 mMaxResultImageSizeX, mMaxResultImageSizeY,
@@ -98,7 +98,7 @@ public class CropImageView extends TransformImageView {
 
         final ImageState imageState = new ImageState(
                 mCropRect, RectUtils.trapToRect(mCurrentImageCorners),
-                getCurrentScale(), getCurrentAngle());
+                getCurrentScale(), getCurrentAngle(), isFlipHorizontally());
 
         final CropParameters cropParameters = new CropParameters(
                 mMaxResultImageSizeX, mMaxResultImageSizeY,
@@ -278,6 +278,7 @@ public class CropImageView extends TransformImageView {
     }
 
     public void postFlip() {
+        mFlipHorizontally = !mFlipHorizontally;
         mCurrentImageMatrix.postScale(-1, 1, mCropRect.centerX(), mCropRect.centerY());
         setImageMatrix(mCurrentImageMatrix);
     }

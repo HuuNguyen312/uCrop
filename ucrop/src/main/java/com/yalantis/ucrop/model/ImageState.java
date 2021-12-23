@@ -11,12 +11,14 @@ public class ImageState {
     private RectF mCurrentImageRect;
 
     private float mCurrentScale, mCurrentAngle;
+    private boolean mFlipHorizontally;
 
-    public ImageState(RectF cropRect, RectF currentImageRect, float currentScale, float currentAngle) {
+    public ImageState(RectF cropRect, RectF currentImageRect, float currentScale, float currentAngle, boolean flipHorizontally) {
         mCropRect = cropRect;
         mCurrentImageRect = currentImageRect;
         mCurrentScale = currentScale;
         mCurrentAngle = currentAngle;
+        mFlipHorizontally = flipHorizontally;
     }
 
     public RectF getCropRect() {
@@ -33,5 +35,9 @@ public class ImageState {
 
     public float getCurrentAngle() {
         return mCurrentAngle;
+    }
+
+    public boolean isFlipHorizontally() {
+        return mFlipHorizontally;
     }
 }
