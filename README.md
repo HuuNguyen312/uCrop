@@ -97,6 +97,10 @@ Since version 2.2.7 in case if you need to change transport protocol, setup time
   * CPU - armeabi armeabi-v7a x86 x86_64 arm64-v8a (for versions >= 2.1.2)
   
 # Changelog
+### Version: 2.3.0
+
+  * Added flip feature
+  
 ### Version: 2.2.3
 
   * Several fixes including [#445](https://github.com/Yalantis/uCrop/issues/445), [#465](https://github.com/Yalantis/uCrop/issues/465) and more!    
