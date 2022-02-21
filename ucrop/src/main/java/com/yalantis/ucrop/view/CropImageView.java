@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 
+import android.util.Log;
 import com.yalantis.ucrop.R;
 import com.yalantis.ucrop.callback.BitmapCropCallback;
 import com.yalantis.ucrop.callback.CropBoundsChangeListener;
@@ -33,6 +34,7 @@ import androidx.annotation.Nullable;
  * Also it extends parent class methods to add checks for scale; animating zoom in/out.
  */
 public class CropImageView extends TransformImageView {
+    public static final String TAG = "CropImageView";
 
     public static final int DEFAULT_MAX_BITMAP_SIZE = 0;
     public static final int DEFAULT_IMAGE_TO_CROP_BOUNDS_ANIM_DURATION = 500;
@@ -274,6 +276,7 @@ public class CropImageView extends TransformImageView {
      * @param deltaAngle - angle to rotate
      */
     public void postRotate(float deltaAngle) {
+        Log.d(TAG, "postRotate deltaAngle = " + deltaAngle);
         postRotate(deltaAngle, mCropRect.centerX(), mCropRect.centerY());
     }
 
