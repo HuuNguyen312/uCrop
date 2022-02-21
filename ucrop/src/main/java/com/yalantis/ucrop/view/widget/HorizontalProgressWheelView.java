@@ -114,8 +114,11 @@ public class HorizontalProgressWheelView extends View {
                     mCanvasClipBounds.centerY() + mProgressLineHeight / 4.0f, mProgressLinePaint);
         }
 
-        canvas.drawLine(mCanvasClipBounds.centerX(), mCanvasClipBounds.centerY() - mProgressLineHeight / 2.0f, mCanvasClipBounds.centerX(), mCanvasClipBounds.centerY() + mProgressLineHeight / 2.0f, mProgressMiddleLinePaint);
-
+        canvas.drawLine(mCanvasClipBounds.centerX() - mProgressLineWidth / 2.0f,
+            mCanvasClipBounds.centerY() - mProgressLineHeight / 2.0f,
+            mCanvasClipBounds.centerX() - mProgressLineWidth / 2.0f,
+            mCanvasClipBounds.centerY() + mProgressLineHeight / 2.0f,
+            mProgressMiddleLinePaint);
     }
 
     private void onScrollEvent(MotionEvent event, float distance) {
