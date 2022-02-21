@@ -7,18 +7,18 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
-import com.yalantis.ucrop.R;
-
 import androidx.annotation.ColorInt;
 import androidx.core.content.ContextCompat;
+import com.yalantis.ucrop.R;
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
  */
 public class HorizontalProgressWheelView extends View {
+    private static final String TAG = "HorizontalProgress";
 
     private final Rect mCanvasClipBounds = new Rect();
 
@@ -77,6 +77,7 @@ public class HorizontalProgressWheelView extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 float distance = event.getX() - mLastTouchedPosition;
+                Log.d(TAG, "onTouchEvent distance = " + distance);
                 if (distance != 0) {
                     if (!mScrollStarted) {
                         mScrollStarted = true;
@@ -95,42 +96,94 @@ public class HorizontalProgressWheelView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.getClipBounds(mCanvasClipBounds);
+        int spacingItem = mProgressLineWidth + mProgressLineMargin;
+        int linesCount = mCanvasClipBounds.width() / spacingItem;
+        float deltaX = mTotalScrollDistance % ((float) spacingItem);
+        int deltaPosition = Math.abs( (int) (mTotalScrollDistance / spacingItem));
+        Log.d(TAG, "onDraw mTotalScrollDistance " + mTotalScrollDistance + ", linesCount1 " + linesCount + ", deltaX " + deltaX + ", spacingItem " + spacingItem + ", deltaPosition " + deltaPosition);
 
-        int linesCount = mCanvasClipBounds.width() / (mProgressLineWidth + mProgressLineMargin);
-        float deltaX = (mTotalScrollDistance) % (float) (mProgressLineMargin + mProgressLineWidth);
-
-        for (int i = 0; i < linesCount; i++) {
-            if (i < (linesCount / 4)) {
-                mProgressLinePaint.setAlpha((int) (255 * (i / (float) (linesCount / 4))));
-            } else if (i > (linesCount * 3 / 4)) {
-                mProgressLinePaint.setAlpha((int) (255 * ((linesCount - i) / (float) (linesCount / 4))));
-            } else {
-                mProgressLinePaint.setAlpha(255);
-            }
-            canvas.drawLine(
-                    -deltaX + mCanvasClipBounds.left + i * (mProgressLineWidth + mProgressLineMargin),
-                    mCanvasClipBounds.centerY() - mProgressLineHeight / 4.0f,
-                    -deltaX + mCanvasClipBounds.left + i * (mProgressLineWidth + mProgressLineMargin),
-                    mCanvasClipBounds.centerY() + mProgressLineHeight / 4.0f, mProgressLinePaint);
+        // Thêm 1 cái ở giữa trước
+        mProgressLinePaint.setAlpha(255);
+        if (deltaX != 0f) {
+            mProgressLinePaint.setColor(mMiddleLineColor);
+        } else {
+            mProgressLinePaint.setColor(getResources().getColor(R.color.ucrop_color_progress_wheel_line));
         }
+        canvas.drawLine(-deltaX + mCanvasClipBounds.centerX(),
+            mCanvasClipBounds.centerY() - mProgressLineHeight / 4.0f,
+            -deltaX + mCanvasClipBounds.centerX(),
+            mCanvasClipBounds.centerY() + mProgressLineHeight / 4.0f,
+            mProgressLinePaint);
 
-        canvas.drawLine(mCanvasClipBounds.centerX() - mProgressLineWidth / 2.0f,
-            mCanvasClipBounds.centerY() - mProgressLineHeight / 2.0f,
-            mCanvasClipBounds.centerX() - mProgressLineWidth / 2.0f,
-            mCanvasClipBounds.centerY() + mProgressLineHeight / 2.0f,
-            mProgressMiddleLinePaint);
+        int max = linesCount / 2;
+        for (int i = 0; i < max; i++) {
+            if (mTotalScrollDistance < 0 && i < deltaPosition) {
+                // Tô màu bên phải
+                mProgressLinePaint.setColor(mMiddleLineColor);
+            } else {
+                // Tô màu mặc định
+                mProgressLinePaint.setColor(getResources().getColor(R.color.ucrop_color_progress_wheel_line));
+            }
+            if (i < max - 5) {
+                mProgressLinePaint.setAlpha(255);
+            } else {
+                mProgressLinePaint.setAlpha((int) (255 * ((max - (i + 1)) / (float) (max - 5))));
+            }
+//            // Thêm từ giữa sang phải.
+            canvas.drawLine(
+                -deltaX + mCanvasClipBounds.centerX() + (i + 1) * spacingItem,
+                mCanvasClipBounds.centerY() - mProgressLineHeight / 4.0f,
+                -deltaX + mCanvasClipBounds.centerX() + (i + 1) * spacingItem,
+                mCanvasClipBounds.centerY() + mProgressLineHeight / 4.0f, mProgressLinePaint);
+
+            if (mTotalScrollDistance > 0 && i < deltaPosition) {
+                // Tô màu bên trái
+                mProgressLinePaint.setColor(mMiddleLineColor);
+            } else {
+                // Tô màu mặc định
+                mProgressLinePaint.setColor(getResources().getColor(R.color.ucrop_color_progress_wheel_line));
+            }
+            if (i < max - 5) {
+                mProgressLinePaint.setAlpha(255);
+            } else {
+                mProgressLinePaint.setAlpha((int) (255 * ((max - (i + 1)) / (float) (max - 5))));
+            }
+//            // Thêm từ giữa sang trái
+            canvas.drawLine(
+                -deltaX + mCanvasClipBounds.centerX() - (i + 1) * spacingItem,
+                mCanvasClipBounds.centerY() - mProgressLineHeight / 4.0f,
+                -deltaX + mCanvasClipBounds.centerX() - (i + 1) * spacingItem,
+                mCanvasClipBounds.centerY() + mProgressLineHeight / 4.0f, mProgressLinePaint);
+        }
+        Log.d(TAG, "onDraw width = " + mCanvasClipBounds.width() + ", spacingItem = " + spacingItem);
+        canvas.drawLine(mCanvasClipBounds.centerX(), mCanvasClipBounds.centerY() - mProgressLineHeight / 2.0f, mCanvasClipBounds.centerX(), mCanvasClipBounds.centerY() + mProgressLineHeight / 2.0f, mProgressMiddleLinePaint);
     }
 
     private void onScrollEvent(MotionEvent event, float distance) {
         mTotalScrollDistance -= distance;
+        Log.d(TAG, "onScrollEvent = " + mTotalScrollDistance + ", distance = " + distance);
         postInvalidate();
         mLastTouchedPosition = event.getX();
         if (mScrollingListener != null) {
-            mScrollingListener.onScroll(-distance, mTotalScrollDistance);
+            mScrollingListener.onScroll(-distance, mTotalScrollDistance, mProgressLineWidth + mProgressLineMargin);
+        }
+    }
+
+    public void clear() {
+        mTotalScrollDistance = 0;
+        postInvalidate();
+    }
+
+    public void updateDegree(float degree) {
+        float newDistance = degree * (mProgressLineWidth + mProgressLineMargin);
+        if (mTotalScrollDistance != newDistance) {
+            mTotalScrollDistance = newDistance;
+            postInvalidate();
         }
     }
 
     private void init() {
+        Log.d(TAG, "init ");
         mMiddleLineColor = ContextCompat.getColor(getContext(), R.color.ucrop_color_widget_rotate_mid_line);
 
         mProgressLineWidth = getContext().getResources().getDimensionPixelSize(R.dimen.ucrop_width_horizontal_wheel_progress_line);
@@ -152,7 +205,7 @@ public class HorizontalProgressWheelView extends View {
 
         void onScrollStart();
 
-        void onScroll(float delta, float totalDistance);
+        void onScroll(float delta, float totalDistance, float spacingItem);
 
         void onScrollEnd();
     }

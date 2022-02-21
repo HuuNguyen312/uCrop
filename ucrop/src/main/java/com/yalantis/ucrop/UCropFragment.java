@@ -7,6 +7,7 @@ import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,6 +89,7 @@ public class UCropFragment extends Fragment {
     private ViewGroup mLayoutAspectRatio, mLayoutRotate, mLayoutScale;
     private List<ViewGroup> mCropAspectRatioViews = new ArrayList<>();
     private TextView mTextViewRotateAngle, mTextViewScalePercent;
+    private HorizontalProgressWheelView mHorizontalProgressWheelView;
     private View mBlockingView;
 
     private Bitmap.CompressFormat mCompressFormat = DEFAULT_COMPRESS_FORMAT;
@@ -137,7 +139,7 @@ public class UCropFragment extends Fragment {
 
 
     public void setupViews(View view, Bundle args) {
-        mActiveControlsWidgetColor = args.getInt(UCrop.Options.EXTRA_UCROP_COLOR_CONTROLS_WIDGET_ACTIVE, ContextCompat.getColor(getContext(), R.color.ucrop_color_widget_active));
+        mActiveControlsWidgetColor = args.getInt(UCrop.Options.EXTRA_UCROP_COLOR_CONTROLS_WIDGET_ACTIVE, ContextCompat.getColor(getContext(), R.color.ucrop_color_active_controls_color));
         mLogoColor = args.getInt(UCrop.Options.EXTRA_UCROP_LOGO_COLOR, ContextCompat.getColor(getContext(), R.color.ucrop_color_default_logo));
         mShowBottomControls = !args.getBoolean(UCrop.Options.EXTRA_HIDE_BOTTOM_CONTROLS, false);
         mRootViewBackgroundColor = args.getInt(UCrop.Options.EXTRA_UCROP_ROOT_VIEW_BACKGROUND_COLOR, ContextCompat.getColor(getContext(), R.color.ucrop_color_crop_background));
@@ -279,6 +281,8 @@ public class UCropFragment extends Fragment {
     private TransformImageView.TransformImageListener mImageListener = new TransformImageView.TransformImageListener() {
         @Override
         public void onRotate(float currentAngle) {
+            Log.d(TAG, "currentAngle " + currentAngle);
+            mHorizontalProgressWheelView.updateDegree(currentAngle);
             setAngleText(currentAngle);
         }
 
@@ -368,11 +372,12 @@ public class UCropFragment extends Fragment {
 
     private void setupRotateWidget(View view) {
         mTextViewRotateAngle = view.findViewById(R.id.text_view_rotate);
-        ((HorizontalProgressWheelView) view.findViewById(R.id.rotate_scroll_wheel))
-                .setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
+        mHorizontalProgressWheelView = view.findViewById(R.id.rotate_scroll_wheel);
+        mHorizontalProgressWheelView.setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
                     @Override
-                    public void onScroll(float delta, float totalDistance) {
-                        mGestureCropImageView.postRotate(delta / ROTATE_WIDGET_SENSITIVITY_COEFFICIENT);
+                    public void onScroll(final float delta, final float totalDistance, final float spacingItem) {
+                        Log.d(TAG, "onScroll delta = " + delta + ", totalDistance = " + totalDistance + ", spacingItem " + spacingItem);
+                        mGestureCropImageView.postRotate(delta / spacingItem);
                     }
 
                     @Override
@@ -386,7 +391,7 @@ public class UCropFragment extends Fragment {
                     }
                 });
 
-        ((HorizontalProgressWheelView) view.findViewById(R.id.rotate_scroll_wheel)).setMiddleLineColor(mActiveControlsWidgetColor);
+        mHorizontalProgressWheelView.setMiddleLineColor(mActiveControlsWidgetColor);
 
 
         view.findViewById(R.id.wrapper_reset_rotate).setOnClickListener(new View.OnClickListener() {
@@ -398,7 +403,7 @@ public class UCropFragment extends Fragment {
         view.findViewById(R.id.wrapper_rotate_by_angle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rotateByAngle(90);
+                rotateByAngle(90f);
             }
         });
         view.findViewById(R.id.wrapper_flip).setOnClickListener(new View.OnClickListener() {
@@ -415,7 +420,7 @@ public class UCropFragment extends Fragment {
         ((HorizontalProgressWheelView) view.findViewById(R.id.scale_scroll_wheel))
                 .setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
                     @Override
-                    public void onScroll(float delta, float totalDistance) {
+                    public void onScroll(float delta, float totalDistance, final float spacingItem) {
                         if (delta > 0) {
                             mGestureCropImageView.zoomInImage(mGestureCropImageView.getCurrentScale()
                                     + delta * ((mGestureCropImageView.getMaxScale() - mGestureCropImageView.getMinScale()) / SCALE_WIDGET_SENSITIVITY_COEFFICIENT));
@@ -467,9 +472,11 @@ public class UCropFragment extends Fragment {
     private void resetRotation() {
         mGestureCropImageView.postRotate(-mGestureCropImageView.getCurrentAngle());
         mGestureCropImageView.setImageToWrapCropBounds();
+        mHorizontalProgressWheelView.clear();
     }
 
-    private void rotateByAngle(int angle) {
+    private void rotateByAngle(float angle) {
+        mHorizontalProgressWheelView.updateDegree(angle);
         mGestureCropImageView.postRotate(angle);
         mGestureCropImageView.setImageToWrapCropBounds();
     }
