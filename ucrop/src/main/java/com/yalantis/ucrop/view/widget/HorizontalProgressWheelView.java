@@ -96,7 +96,7 @@ public class HorizontalProgressWheelView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.getClipBounds(mCanvasClipBounds);
-        int spacingItem = mProgressLineWidth + mProgressLineMargin;
+        int spacingItem = getSpacingItem();
         int linesCount = mCanvasClipBounds.width() / spacingItem;
         float deltaX = mTotalScrollDistance % ((float) spacingItem);
         int deltaPosition = Math.abs( (int) (mTotalScrollDistance / spacingItem));
@@ -165,7 +165,7 @@ public class HorizontalProgressWheelView extends View {
         postInvalidate();
         mLastTouchedPosition = event.getX();
         if (mScrollingListener != null) {
-            mScrollingListener.onScroll(-distance, mTotalScrollDistance, mProgressLineWidth + mProgressLineMargin);
+            mScrollingListener.onScroll(-distance, mTotalScrollDistance);
         }
     }
 
@@ -174,8 +174,12 @@ public class HorizontalProgressWheelView extends View {
         postInvalidate();
     }
 
+    public int getSpacingItem() {
+        return mProgressLineWidth + mProgressLineMargin;
+    }
+
     public void updateDegree(float degree) {
-        float newDistance = degree * (mProgressLineWidth + mProgressLineMargin);
+        float newDistance = degree * getSpacingItem();
         if (mTotalScrollDistance != newDistance) {
             mTotalScrollDistance = newDistance;
             postInvalidate();
@@ -205,7 +209,7 @@ public class HorizontalProgressWheelView extends View {
 
         void onScrollStart();
 
-        void onScroll(float delta, float totalDistance, float spacingItem);
+        void onScroll(float delta, float totalDistance);
 
         void onScrollEnd();
     }

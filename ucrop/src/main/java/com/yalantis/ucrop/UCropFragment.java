@@ -1,5 +1,7 @@
 package com.yalantis.ucrop;
 
+import static androidx.appcompat.app.AppCompatActivity.RESULT_OK;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,24 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.yalantis.ucrop.callback.BitmapCropCallback;
-import com.yalantis.ucrop.model.AspectRatio;
-import com.yalantis.ucrop.util.SelectedStateListDrawable;
-import com.yalantis.ucrop.view.CropImageView;
-import com.yalantis.ucrop.view.GestureCropImageView;
-import com.yalantis.ucrop.view.OverlayView;
-import com.yalantis.ucrop.view.TransformImageView;
-import com.yalantis.ucrop.view.UCropView;
-import com.yalantis.ucrop.view.widget.AspectRatioTextView;
-import com.yalantis.ucrop.view.widget.HorizontalProgressWheelView;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.IdRes;
 import androidx.annotation.IntDef;
@@ -46,8 +30,21 @@ import androidx.fragment.app.Fragment;
 import androidx.transition.AutoTransition;
 import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
-
-import static androidx.appcompat.app.AppCompatActivity.RESULT_OK;
+import com.yalantis.ucrop.callback.BitmapCropCallback;
+import com.yalantis.ucrop.model.AspectRatio;
+import com.yalantis.ucrop.util.SelectedStateListDrawable;
+import com.yalantis.ucrop.view.CropImageView;
+import com.yalantis.ucrop.view.GestureCropImageView;
+import com.yalantis.ucrop.view.OverlayView;
+import com.yalantis.ucrop.view.TransformImageView;
+import com.yalantis.ucrop.view.UCropView;
+import com.yalantis.ucrop.view.widget.AspectRatioTextView;
+import com.yalantis.ucrop.view.widget.HorizontalProgressWheelView;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 @SuppressWarnings("ConstantConditions")
 public class UCropFragment extends Fragment {
@@ -89,7 +86,8 @@ public class UCropFragment extends Fragment {
     private ViewGroup mLayoutAspectRatio, mLayoutRotate, mLayoutScale;
     private List<ViewGroup> mCropAspectRatioViews = new ArrayList<>();
     private TextView mTextViewRotateAngle, mTextViewScalePercent;
-    private HorizontalProgressWheelView mHorizontalProgressWheelView;
+    private HorizontalProgressWheelView mRotateProgressWheelView;
+    private HorizontalProgressWheelView mScaleProgressWheelView;
     private View mBlockingView;
 
     private Bitmap.CompressFormat mCompressFormat = DEFAULT_COMPRESS_FORMAT;
@@ -282,7 +280,7 @@ public class UCropFragment extends Fragment {
         @Override
         public void onRotate(float currentAngle) {
             Log.d(TAG, "currentAngle " + currentAngle);
-            mHorizontalProgressWheelView.updateDegree(currentAngle);
+            mRotateProgressWheelView.updateDegree(currentAngle);
             setAngleText(currentAngle);
         }
 
@@ -372,12 +370,12 @@ public class UCropFragment extends Fragment {
 
     private void setupRotateWidget(View view) {
         mTextViewRotateAngle = view.findViewById(R.id.text_view_rotate);
-        mHorizontalProgressWheelView = view.findViewById(R.id.rotate_scroll_wheel);
-        mHorizontalProgressWheelView.setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
+        mRotateProgressWheelView = view.findViewById(R.id.rotate_scroll_wheel);
+        mRotateProgressWheelView.setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
                     @Override
-                    public void onScroll(final float delta, final float totalDistance, final float spacingItem) {
-                        Log.d(TAG, "onScroll delta = " + delta + ", totalDistance = " + totalDistance + ", spacingItem " + spacingItem);
-                        mGestureCropImageView.postRotate(delta / spacingItem);
+                    public void onScroll(final float delta, final float totalDistance) {
+                        Log.d(TAG, "onScroll delta = " + delta + ", totalDistance = " + totalDistance + ", spacingItem " + mRotateProgressWheelView.getSpacingItem());
+                        mGestureCropImageView.postRotate(delta / mRotateProgressWheelView.getSpacingItem());
                     }
 
                     @Override
@@ -391,7 +389,7 @@ public class UCropFragment extends Fragment {
                     }
                 });
 
-        mHorizontalProgressWheelView.setMiddleLineColor(mActiveControlsWidgetColor);
+        mRotateProgressWheelView.setMiddleLineColor(mActiveControlsWidgetColor);
 
 
         view.findViewById(R.id.wrapper_reset_rotate).setOnClickListener(new View.OnClickListener() {
@@ -417,10 +415,11 @@ public class UCropFragment extends Fragment {
 
     private void setupScaleWidget(View view) {
         mTextViewScalePercent = view.findViewById(R.id.text_view_scale);
-        ((HorizontalProgressWheelView) view.findViewById(R.id.scale_scroll_wheel))
-                .setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
+        mScaleProgressWheelView = view.findViewById(R.id.scale_scroll_wheel);
+        mScaleProgressWheelView .setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
                     @Override
-                    public void onScroll(float delta, float totalDistance, final float spacingItem) {
+                    public void onScroll(float delta, float totalDistance) {
+                        Log.d(TAG, "QuyDD onScroll delta " + delta + ", totalDistance " + totalDistance);
                         if (delta > 0) {
                             mGestureCropImageView.zoomInImage(mGestureCropImageView.getCurrentScale()
                                     + delta * ((mGestureCropImageView.getMaxScale() - mGestureCropImageView.getMinScale()) / SCALE_WIDGET_SENSITIVITY_COEFFICIENT));
@@ -470,13 +469,17 @@ public class UCropFragment extends Fragment {
     }
 
     private void resetRotation() {
+        if (mGestureCropImageView.isFlipHorizontally()) {
+            mGestureCropImageView.postFlip();
+        }
         mGestureCropImageView.postRotate(-mGestureCropImageView.getCurrentAngle());
+        mRotateProgressWheelView.clear();
+        mGestureCropImageView.clearScale();
         mGestureCropImageView.setImageToWrapCropBounds();
-        mHorizontalProgressWheelView.clear();
     }
 
     private void rotateByAngle(float angle) {
-        mHorizontalProgressWheelView.updateDegree(angle);
+        mRotateProgressWheelView.updateDegree(angle);
         mGestureCropImageView.postRotate(angle);
         mGestureCropImageView.setImageToWrapCropBounds();
     }

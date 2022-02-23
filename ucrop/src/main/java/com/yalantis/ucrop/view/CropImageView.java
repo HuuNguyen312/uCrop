@@ -54,6 +54,7 @@ public class CropImageView extends TransformImageView {
     private Runnable mWrapCropBoundsRunnable, mZoomImageToPositionRunnable = null;
 
     private float mMaxScale, mMinScale;
+    private float mInitialMinScale;
     private int mMaxResultImageSizeX = 0, mMaxResultImageSizeY = 0;
     private long mImageToWrapCropBoundsAnimDuration = DEFAULT_IMAGE_TO_CROP_BOUNDS_ANIM_DURATION;
 
@@ -118,6 +119,10 @@ public class CropImageView extends TransformImageView {
      */
     public float getMaxScale() {
         return mMaxScale;
+    }
+
+    public void clearScale() {
+        zoomOutImage(mInitialMinScale);
     }
 
     /**
@@ -233,6 +238,7 @@ public class CropImageView extends TransformImageView {
      * This method scales image down for given value related given coords (x, y).
      */
     public void zoomOutImage(float scale, float centerX, float centerY) {
+        Log.d(TAG, "QuyDD zoomOutImage scale " + scale + ", centerX " + centerX + ", centerY " + centerY);
         if (scale >= getMinScale()) {
             postScale(scale / getCurrentScale(), centerX, centerY);
         }
@@ -249,6 +255,7 @@ public class CropImageView extends TransformImageView {
      * This method scales image up for given value related to given coords (x, y).
      */
     public void zoomInImage(float scale, float centerX, float centerY) {
+        Log.d(TAG, "QuyDD zoomInImage scale " + scale + ", centerX " + centerX + ", centerY " + centerY);
         if (scale <= getMaxScale()) {
             postScale(scale / getCurrentScale(), centerX, centerY);
         }
@@ -263,6 +270,7 @@ public class CropImageView extends TransformImageView {
      * @param py         - scale center Y
      */
     public void postScale(float deltaScale, float px, float py) {
+        Log.d(TAG, "QuyDD postScale deltaScale " + deltaScale + ", px " + px + ", py " + py);
         if (deltaScale > 1 && getCurrentScale() * deltaScale <= getMaxScale()) {
             super.postScale(deltaScale, px, py);
         } else if (deltaScale < 1 && getCurrentScale() * deltaScale >= getMinScale()) {
@@ -517,16 +525,18 @@ public class CropImageView extends TransformImageView {
         float widthScale = mCropRect.width() / drawableWidth;
         float heightScale = mCropRect.height() / drawableHeight;
 
-        float initialMinScale = Math.max(widthScale, heightScale);
+        mInitialMinScale = Math.max(widthScale, heightScale);
 
-        float tw = (cropRectWidth - drawableWidth * initialMinScale) / 2.0f + mCropRect.left;
-        float th = (cropRectHeight - drawableHeight * initialMinScale) / 2.0f + mCropRect.top;
+        float tw = (cropRectWidth - drawableWidth * mInitialMinScale) / 2.0f + mCropRect.left;
+        float th = (cropRectHeight - drawableHeight * mInitialMinScale) / 2.0f + mCropRect.top;
 
         mCurrentImageMatrix.reset();
-        mCurrentImageMatrix.postScale(initialMinScale, initialMinScale);
+        mCurrentImageMatrix.postScale(mInitialMinScale, mInitialMinScale);
         mCurrentImageMatrix.postTranslate(tw, th);
         setImageMatrix(mCurrentImageMatrix);
     }
+
+
 
     /**
      * This method extracts all needed values from the styled attributes.
