@@ -238,7 +238,7 @@ public class CropImageView extends TransformImageView {
      * This method scales image down for given value related given coords (x, y).
      */
     public void zoomOutImage(float scale, float centerX, float centerY) {
-        Log.d(TAG, "QuyDD zoomOutImage scale " + scale + ", centerX " + centerX + ", centerY " + centerY);
+        Log.d(TAG, "zoomOutImage scale " + scale + ", centerX " + centerX + ", centerY " + centerY);
         if (scale >= getMinScale()) {
             postScale(scale / getCurrentScale(), centerX, centerY);
         }
@@ -255,7 +255,7 @@ public class CropImageView extends TransformImageView {
      * This method scales image up for given value related to given coords (x, y).
      */
     public void zoomInImage(float scale, float centerX, float centerY) {
-        Log.d(TAG, "QuyDD zoomInImage scale " + scale + ", centerX " + centerX + ", centerY " + centerY);
+        Log.d(TAG, "zoomInImage scale " + scale + ", centerX " + centerX + ", centerY " + centerY);
         if (scale <= getMaxScale()) {
             postScale(scale / getCurrentScale(), centerX, centerY);
         }
@@ -270,7 +270,7 @@ public class CropImageView extends TransformImageView {
      * @param py         - scale center Y
      */
     public void postScale(float deltaScale, float px, float py) {
-        Log.d(TAG, "QuyDD postScale deltaScale " + deltaScale + ", px " + px + ", py " + py);
+        Log.d(TAG, "postScale deltaScale " + deltaScale + ", px " + px + ", py " + py);
         if (deltaScale > 1 && getCurrentScale() * deltaScale <= getMaxScale()) {
             super.postScale(deltaScale, px, py);
         } else if (deltaScale < 1 && getCurrentScale() * deltaScale >= getMinScale()) {

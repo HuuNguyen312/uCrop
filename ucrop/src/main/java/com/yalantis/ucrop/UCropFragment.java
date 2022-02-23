@@ -419,7 +419,7 @@ public class UCropFragment extends Fragment {
         mScaleProgressWheelView .setScrollingListener(new HorizontalProgressWheelView.ScrollingListener() {
                     @Override
                     public void onScroll(float delta, float totalDistance) {
-                        Log.d(TAG, "QuyDD onScroll delta " + delta + ", totalDistance " + totalDistance);
+                        Log.d(TAG, "onScroll delta " + delta + ", totalDistance " + totalDistance);
                         if (delta > 0) {
                             mGestureCropImageView.zoomInImage(mGestureCropImageView.getCurrentScale()
                                     + delta * ((mGestureCropImageView.getMaxScale() - mGestureCropImageView.getMinScale()) / SCALE_WIDGET_SENSITIVITY_COEFFICIENT));
